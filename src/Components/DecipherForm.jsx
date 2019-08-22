@@ -15,8 +15,29 @@ class DecipherForm extends Component {
     this.state = {
       textToDecipher: 'XXXXXXXXXXX',
       result: '',
+      pivot: '',
       isLoading: false,
       decipheredSuccessfully: false,
+    }
+  }
+  
+
+  readFile = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.type === 'text/plain') {
+        const fileReader = new FileReader();
+        fileReader.onloadend = () => {
+          const content = fileReader.result;
+          this.setState({
+            textToDecipher: content,
+          });
+        }
+        fileReader.readAsText(file);
+      } else {
+        alert("Formato de documento no soportado");
+      }
+      console.log(file);
     }
   }
 
@@ -28,14 +49,17 @@ class DecipherForm extends Component {
     });
 
     const response = axios.get(`http://decipher:8888/api/decipher.php?text=${this.state.textToDecipher}`).then((response) => {
-      console.log(response);
+      console.log(response.data);
       if (response.data.success) {
         this.setState({
+          decipheredSuccessfully: true,
           isLoading: false,
-          result: 'Texto traducido chido',
+          result: response.data.decipheredText,
+          pivot: response.data.pivot,
         }); 
       } else {
         this.setState({
+          decipheredSuccessfully: false,
           isLoading: false,
           result: 'No es un texto en ingles',
         }); 
@@ -54,9 +78,35 @@ class DecipherForm extends Component {
   render() {
     return(
       <Fragment>
-        <Typography variant="h6" gutterBottom>
-          Texto:
-        </Typography>
+        <div className={this.props.classes.titleContainer}>
+            <Typography 
+              variant="h6"
+              gutterBottom
+              className={this.props.classes.titleLabel}
+            >
+              Texto:
+            </Typography>
+            <input
+              id="inputUploadFile"
+              style={{display: 'none'}}
+              type="file"
+              name="textToDecipher"
+              onChange={this.readFile}
+            />
+            <label htmlFor="inputUploadFile">
+              <Button
+                variant="contained"
+                component="span"
+                className={this.props.classes.buttonLabel}
+                color="secondary"
+                loading={this.state.isLoading}
+              >
+                Subir Archivo
+              </Button>
+            </label>
+            
+        </div>
+        
         <TextField
           id="outlined-multiline-static"
           label="Cadena cifrada"
@@ -76,6 +126,18 @@ class DecipherForm extends Component {
         <Typography variant="h8" gutterBottom>
           {this.state.result}
         </Typography>
+        { this.state.decipheredSuccessfully ? 
+          <Fragment>
+            <Typography variant="h6" gutterBottom>
+              Pivote:
+            </Typography>
+            <Typography variant="h8" gutterBottom>
+              {this.state.pivot}
+            </Typography>
+          </Fragment>
+          : '' 
+        }
+
         <div className={this.props.classes.buttons}>
           {this.state.isLoading ? 
             <CircularProgress color="secondary" /> 

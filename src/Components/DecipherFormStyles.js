@@ -19,12 +19,24 @@ export default theme => ({
       marginLeft: '10px',
     },
     divider: {
-        marginTop: '10px',
+        marginTop: '20px',
         marginLeft: '10px',
+        marginBottom: '20px',
     },
     textField: {
         display: 'flex',
         width: '100%',
     },
+    titleContainer: {
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'space-between'
+    },
+    titleLabel: {
+      display: 'flex',
+    },
+    buttonLabel: {
+      display: 'flex',
+    }
   }
 );

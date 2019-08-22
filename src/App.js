@@ -22,7 +22,12 @@ export default () => {
       </AppBar>
       <main className={classes.layout}>
         <Paper className={classes.paper}>
-          <Typography component="h1" variant="h4" align="center">
+          <Typography 
+            component="h1" 
+            variant="h4" 
+            align="center"
+            className={classes.titlePaper}
+          >
             Descifrador de texto
           </Typography>
           <DecipherForm />
