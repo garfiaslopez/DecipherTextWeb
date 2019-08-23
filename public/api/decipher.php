@@ -1,9 +1,12 @@
 <?php
     // CORS Enabled
     header("Access-Control-Allow-Origin: *");
+    header("Access-Control-Allow-Methods: GET,PUT,POST,DELETE");
+    header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
     // Main variables:
-    $originalText = isset($_GET['text']) ? $_GET['text'] : ''; // from params
+    $data = json_decode(file_get_contents('php://input'), true);
+    $originalText = $data['data'];
     $pivotFounded = NULL;
     $decipheredTextFounded = '';
     $wordList = array ('the', 'be', 'to', 'of', 'and', 'a', 'in', 

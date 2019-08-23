@@ -13,6 +13,7 @@ class DecipherForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      fileUrl: 'Ningun archivo seleccionado.',
       textToDecipher: 'XXXXXXXXXXX',
       result: '',
       pivot: '',
@@ -30,6 +31,7 @@ class DecipherForm extends Component {
         fileReader.onloadend = () => {
           const content = fileReader.result;
           this.setState({
+            fileUrl: file.name,
             textToDecipher: content,
           });
         }
@@ -44,29 +46,39 @@ class DecipherForm extends Component {
   handleClick = () => {
     console.log("Sending text");
     console.log(this.state.textToDecipher);
-    this.setState({
-      isLoading: true,
-    });
-
-    const response = axios.get(`http://decipher:8888/api/decipher.php?text=${this.state.textToDecipher}`).then((response) => {
-      console.log(response.data);
-      if (response.data.success) {
+    if (this.state.textToDecipher && this.state.textToDecipher != "") {
+      this.setState({
+        isLoading: true,
+      });
+  
+      const response = axios.post(`http://decipher:8888/api/decipher.php`, {
+        'data': this.state.textToDecipher,
+      }).then((response) => {
+        console.log(response.data);
+        if (response.data.success) {
+          this.setState({
+            decipheredSuccessfully: true,
+            isLoading: false,
+            result: response.data.decipheredText,
+            pivot: response.data.pivot,
+          }); 
+        } else {
+          this.setState({
+            decipheredSuccessfully: false,
+            isLoading: false,
+            result: 'No es un texto en ingles',
+          }); 
+        }
+      }).catch((error) => { 
+        alert(error);
         this.setState({
-          decipheredSuccessfully: true,
           isLoading: false,
-          result: response.data.decipheredText,
-          pivot: response.data.pivot,
-        }); 
-      } else {
-        this.setState({
-          decipheredSuccessfully: false,
-          isLoading: false,
-          result: 'No es un texto en ingles',
-        }); 
-      }
-    }).catch((error) => { 
-      console.log("ON ERROR", error);
-    });
+        })
+      });
+    } else {
+      alert("Favor de elegir un archivo o introducir una cadena cifrada.");
+    }
+    
   }
 
   onChangeTextfield = (event) => {
@@ -80,11 +92,11 @@ class DecipherForm extends Component {
       <Fragment>
         <div className={this.props.classes.titleContainer}>
             <Typography 
-              variant="h6"
+              variant="subtitle1"
               gutterBottom
               className={this.props.classes.titleLabel}
             >
-              Texto:
+              Selecciona algun archivo:
             </Typography>
             <input
               id="inputUploadFile"
@@ -99,11 +111,28 @@ class DecipherForm extends Component {
                 component="span"
                 className={this.props.classes.buttonLabel}
                 color="secondary"
-                loading={this.state.isLoading}
+                loading={this.state.isLoading.toString()}
               >
                 Subir Archivo
               </Button>
             </label>
+        </div>
+        <div className={this.props.classes.titleContainer}>
+            <Typography 
+              variant="subtitle1"
+              gutterBottom
+              className={this.props.classes.titleLabel}
+            >
+              Nombre de archivo:
+            </Typography>
+            
+            <Typography 
+              variant="subtitle1"
+              gutterBottom
+              className={this.props.classes.titleLabel}
+            >
+              {this.state.fileUrl}
+            </Typography>
             
         </div>
         
@@ -123,7 +152,7 @@ class DecipherForm extends Component {
         <Typography variant="h6" gutterBottom>
           Mensaje Descifrado:
         </Typography>
-        <Typography variant="h8" gutterBottom>
+        <Typography variant="h6" gutterBottom>
           {this.state.result}
         </Typography>
         { this.state.decipheredSuccessfully ? 
@@ -131,7 +160,7 @@ class DecipherForm extends Component {
             <Typography variant="h6" gutterBottom>
               Pivote:
             </Typography>
-            <Typography variant="h8" gutterBottom>
+            <Typography variant="subtitle1" gutterBottom>
               {this.state.pivot}
             </Typography>
           </Fragment>
@@ -147,7 +176,7 @@ class DecipherForm extends Component {
               color="primary"
               onClick={this.handleClick}
               className={this.props.classes.button}
-              loading={this.state.isLoading}
+              loading={this.state.isLoading.toString()}
             >
               Descifrar
             </Button>
